@@ -29,12 +29,12 @@ void on_unload(UnifexEnv *env, void *priv_data) {
 }
 
 void handle_destroy_state(UnifexEnv *env, UnifexState *state) {
+  UNIFEX_UNUSED(env);
+
   if (state->session) {
     srtp_dealloc(state->session);
     state->session = NULL;
   }
-
-  unifex_release_state(env, state);
 }
 
 static void free_master_keys_array(srtp_policy_t *policy) {
@@ -127,7 +127,9 @@ UNIFEX_TERM create(UnifexEnv *env) {
     return unifex_raise(env, srtp_util_strerror(err));
   }
 
-  return create_result(env, state);
+  UNIFEX_TERM res_term = create_result(env, state);
+  unifex_release_state(env, state);
+  return res_term;
 }
 
 bool create_policy(UnifexEnv *env, srtp_policy_t *policy, int ssrc_type,
